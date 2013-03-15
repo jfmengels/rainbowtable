@@ -24,6 +24,7 @@ class RainbowTable {
 		Table table;		/* table containing all the rows (hash + password) */
 		HashMethod* hashMethod; /* hashing function */
 		
+		void fillTable();
 		std::vector<std::string> findHash() const;
 		std::string reduce(const std::string& hash, int column) const;
 		std::string createChain(std::string pwd) const;

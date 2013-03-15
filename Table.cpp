@@ -54,9 +54,8 @@ vector<string> Table::find(const string& hash) const {
 	return results;
 }
 		
-void Table::insert(const string& hash, const string& pwd) {
-	Pair pair(pwd, hash);
-	int index = findIndex(hash);
+void Table::insert(const Pair& pair) {
+	int index = findIndex(pair.hash());
 	rows.insert(rows.begin()+index, pair);
 }
 

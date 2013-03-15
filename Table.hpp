@@ -28,7 +28,7 @@ class Table {
 	
 	public:
 		std::vector<std::string> find(const std::string& hash) const;	
-		void insert(const std::string& hash, const std::string& pwd);
+		void insert(const Pair& pair);
 		void insertAtEnd(const std::string& hash, const std::string& pwd);
 		std::ostream& toString(std::ostream& stream) const;
 		void liberate();

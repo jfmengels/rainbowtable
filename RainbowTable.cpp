@@ -1,9 +1,11 @@
-#include "RainbowTable.hpp"
-#include <time.h>
-#include <stdlib.h>
-#include <iostream>
-#include <cstring>
-#include <fstream>
+#include "RainbowTable.hpp"	/* Rainbow table */
+#include <time.h>		/* For randomness, via srand() */
+#include <stdlib.h>		
+#include <iostream>		/* cout */
+#include <cstring>		/* str.c_str() */
+#include <fstream>		/* File input / output */
+#include <omp.h>		/* Parallelism with OpenMP */
+#include "Table.hpp"	/* Pair class */
 
 using namespace std;
 
@@ -19,12 +21,40 @@ RainbowTable::RainbowTable(int columns, int rows, string chars,
 	this->pwdLength = pwdLength;
 	this->hashMethod = hashMethod;
 	
-	string pwd, hash;
-	for (int i = 0; i < rows; i++) {
-		pwd = this->randomPassword();
-		hash = this->createChain(pwd);
-		table.insert(hash, pwd);
+	this->fillTable();
+}
+
+void RainbowTable::fillTable() {
+	omp_lock_t lock;
+	omp_init_lock(&lock);
+
+	#pragma omp parallel
+	{
+		string pwd, hash;
+		vector<Pair> v;
+		int nProc = omp_get_thread_num();
+		int totalProc = omp_get_num_threads();
+		for (int i = nProc; i < rows; i+= totalProc) {
+			pwd = this->randomPassword();
+			hash = this->createChain(pwd);
+			Pair pair(pwd, hash);
+			v.push_back(pair);
+			if (omp_test_lock(&lock)) {
+				while (!v.empty()) {
+					table.insert(v.back());
+					v.pop_back();
+				}
+				omp_unset_lock(&lock);
+			}
+		}
+		omp_set_lock(&lock);
+		while (!v.empty()) {
+			table.insert(v.back());
+			v.pop_back();
+		}
+		omp_unset_lock(&lock);
 	}
+	omp_destroy_lock(&lock);
 }
 
 RainbowTable::~RainbowTable() {
@@ -119,17 +149,25 @@ std::string RainbowTable::createChain(std::string pwd) const {
 }
 
 std::string RainbowTable::crackPassword(std::string const& startHash) const {
-	string result = "";
-	string hash, pwd;
-	vector<string> possiblePwd;
-	vector<string>::const_iterator it;
-	for (int col=this->columns-1; col>=0; col--) {
-		hash = this->getFinalHash(startHash, col);
-		possiblePwd = this->table.find(hash);
-		for (it=possiblePwd.begin(); it < possiblePwd.end(); it++) {
-			pwd = this->findHashInChain(*it, startHash);
-			if (pwd != "") {
-				return pwd;
+
+	string result;
+	#pragma omp parallel
+	{
+		int nProc = omp_get_thread_num();
+		int totalProc = omp_get_num_threads();
+		
+		string hash, pwd;
+		vector<string> possiblePwd;
+		vector<string>::const_iterator it;
+		
+		for (int col=this->columns-1-nProc; col>=0 && result == ""; col-=totalProc) {
+			hash = this->getFinalHash(startHash, col);
+			possiblePwd = this->table.find(hash);
+			for (it=possiblePwd.begin(); it < possiblePwd.end(); it++) {
+				pwd = this->findHashInChain(*it, startHash);
+				if (pwd != "") {
+					result = pwd;
+				}
 			}
 		}
 	}

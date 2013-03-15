@@ -1,6 +1,6 @@
 OBJ=RainbowTable.o Table.o md5.o testRainbow.o
 CC=g++
-CFLAGS=-ansi -I./ -g
+CFLAGS=-fopenmp -ansi -I./ -g -lrt
 EXE=rain
 
 rain : $(OBJ)
