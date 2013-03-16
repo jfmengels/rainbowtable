@@ -8,6 +8,7 @@ using namespace std;
 
 RainbowTable** TestRainbow::_rainInstance = NULL;
 
+
 TestRainbow::TestRainbow(bool isSilent)
 {
 	this->_isSilent = isSilent;
@@ -44,7 +45,7 @@ double TestRainbow::computeTime(const struct timeval& t0) const
 	return dTime2-dTime1;
 }
 
-double TestRainbow::crackHash(const string& hash) const
+double TestRainbow::crackHash(const string& hash, bool& hasFound) const
 {
 	struct timeval t;
 	gettimeofday(&t, 0);	
@@ -52,7 +53,8 @@ double TestRainbow::crackHash(const string& hash) const
 	double time = computeTime(t);
 	
 	cout << "'" << hash << "' --> ";
-	if (res == "") {
+	hasFound = (res == "");
+	if (hasFound) {
 		cout << "Not found...";
 	} else {
 		cout << "'" << res << "'";
@@ -61,7 +63,7 @@ double TestRainbow::crackHash(const string& hash) const
 	return time;
 }
 
-double TestRainbow::crackWord(const string& pwd) const
+double TestRainbow::crackWord(const string& pwd, bool& hasFound) const
 {
 	struct timeval t;
 	gettimeofday(&t, 0);
@@ -69,7 +71,8 @@ double TestRainbow::crackWord(const string& pwd) const
 	double time = computeTime(t);
 	string hash = _rain->hashWord(pwd);
 	cout << "'" << pwd << "' --> '" << hash << "' --> ";
-	if (res == "") {
+	hasFound = (res == "");
+	if (hasFound) {
 		cout << "Not found...";
 	} else {
 		cout << "'" << res << "'";
@@ -118,32 +121,35 @@ double TestRainbow::loadTable(const string& fileName)
 void TestRainbow::doAction(const string& action)
 {
 	string param1;
-	if (action == "help") {
+	bool res;
+	if (action == "help") { /* Print the help menu. */
 		printInstructions();
 	}
-	else if (action == "new") {
+	else if (action == "new") { /* Create a new table. */
 		newTable();
 	}
-	else if (action == "load") {
+	else if (action == "load") { /* Load a table from a file. */
 		cin >> param1;	// File name
 		loadTable(param1);
 	}
 	else if (_rain == NULL && action != "quit") {
+		 /* If the table has not yet been initialized, interrupt. */
 		cout << "***You need to create or load a table first." << endl;
 	}
-	else if (action == "crackH") {
+	else if (action == "crackH") {  /* Crack a hash. */
 		cin >> param1;	// Hash to crack.
-		crackHash(param1);
+		crackHash(param1, res);
 	}
-	else if (action == "crackW") {
+	else if (action == "crackW") { /* Crack a password. */
 		cin >> param1;	// Word to hash, and then to crack.
-		crackWord(param1);
+		crackWord(param1, res);
 	}
-	else if (action == "save") {
+	else if (action == "save") { /* Save the current table to a file. */
 		cin >> param1;	// File name
 		_rain->writeToFile(param1);
 	}
 	else if (action != "quit") {
+		 /* Invalid command. */
 		cout << action << " is not a valid command." << endl;
 		// Flush buffer
 		cin.clear();

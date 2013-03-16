@@ -1,7 +1,4 @@
 #include "Table.hpp"
-#include <iostream>
-
-/* TODO Remove IOSTREAM */
 
 using namespace std;
 
@@ -65,7 +62,7 @@ void Table::insertAtEnd(const string& hash, const string& pwd) {
 }
 
 
-ostream& Table::toString(std::ostream& stream) const {
+ostream& Table::printTo(std::ostream& stream) const {
 	vector<Pair>::const_iterator it;
 	for (it = rows.begin(); it < rows.end(); it++) {
 		stream << (*it).pwd() << " " << (*it).hash() << endl;
@@ -73,7 +70,7 @@ ostream& Table::toString(std::ostream& stream) const {
 	return stream;
 }
 
-void Table::liberate() {
+void Table::freeMemory() {
 	rows.clear();
 }
 

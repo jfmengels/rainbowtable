@@ -9,22 +9,25 @@
 
 using namespace std;
 
-RainbowTable::RainbowTable(std::string const& fileName) {
+RainbowTable::RainbowTable(std::string const& fileName)
+{
 	this->readFromFile(fileName);
 }
 
 RainbowTable::RainbowTable(int columns, int rows, string chars,
-		int pwdLength, HashMethod* hashMethod=NULL)  {
+		int pwdLength, HashMethod* hashMethod=NULL)
+{
 	this->columns = columns;
 	this->rows = rows;
 	this->chars = chars;
 	this->pwdLength = pwdLength;
 	this->hashMethod = hashMethod;
 	
-	this->fillTable();
+	this->initTable();
 }
 
-void RainbowTable::fillTable() {
+void RainbowTable::initTable()
+{
 	omp_lock_t lock;
 	omp_init_lock(&lock);
 
@@ -57,19 +60,21 @@ void RainbowTable::fillTable() {
 	omp_destroy_lock(&lock);
 }
 
-RainbowTable::~RainbowTable() {
+RainbowTable::~RainbowTable()
+{
 	delete hashMethod;
-	table.liberate();
+	table.freeMemory();
 }
 
-void RainbowTable::writeToFile(std::string const& fileName) const {
+void RainbowTable::writeToFile(std::string const& fileName) const
+{
 	ofstream out(fileName.c_str());
 	if (out) {
 		out << this->columns << " "
 			<< this->chars << " "
 			<< this->pwdLength << " "
 			<< this->hashMethod->name() << endl;
-		table.toString(out);
+		table.printTo(out);
 	} else {
 		cerr << "Could not write to file \"" << fileName << "\"." << endl;
 	}
@@ -77,7 +82,8 @@ void RainbowTable::writeToFile(std::string const& fileName) const {
 	out.close();
 }
 
-void RainbowTable::readFromFile(std::string const& fileName) {
+void RainbowTable::readFromFile(std::string const& fileName)
+{
 	ifstream in(fileName.c_str());
 	if (in) {
 		string hashMethodName;
@@ -103,11 +109,13 @@ void RainbowTable::readFromFile(std::string const& fileName) {
 	}
 }
 
-std::string RainbowTable::hashWord(std::string const& pwd) const {
+std::string RainbowTable::hashWord(std::string const& pwd) const
+{
 	return this->hashMethod->hash(pwd);
 }
 
-std::string RainbowTable::randomPassword() const {
+std::string RainbowTable::randomPassword() const
+{
 	std::string pwd;
 	for (int i=0; i < this->pwdLength; i++) {
 		pwd += this->chars[rand() % this->chars.size()];
@@ -115,7 +123,8 @@ std::string RainbowTable::randomPassword() const {
 	return pwd;
 }
 
-void hexconvert(const char *text, unsigned char* bytes) {
+void hexconvert(const char *text, unsigned char* bytes)
+{
     int temp;
     for(int i = 0; i < 16; i++) {
         sscanf( text + 2 * i, "%2x", &temp );
@@ -123,7 +132,8 @@ void hexconvert(const char *text, unsigned char* bytes) {
     }
 }
 
-std::string RainbowTable::reduce(const std::string& hash, int column) const {
+std::string RainbowTable::reduce(const std::string& hash, int column) const
+{
 	string pwd;
 	int index;
 	unsigned char* bytes = new unsigned char[16];
@@ -139,7 +149,8 @@ std::string RainbowTable::reduce(const std::string& hash, int column) const {
 	return pwd;
 }
 
-std::string RainbowTable::createChain(std::string pwd) const {
+std::string RainbowTable::createChain(std::string pwd) const
+{
 	string hash;
 	for (int col=0; col < this->columns; col++) {
 		hash = this->hashWord(pwd);
@@ -148,7 +159,8 @@ std::string RainbowTable::createChain(std::string pwd) const {
 	return hash;
 }
 
-std::string RainbowTable::crackPassword(std::string const& startHash) const {
+std::string RainbowTable::crackPassword(std::string const& startHash) const
+{
 
 	string result;
 	#pragma omp parallel
@@ -175,7 +187,8 @@ std::string RainbowTable::crackPassword(std::string const& startHash) const {
 }
 
 std::string RainbowTable::getFinalHash(const std::string& startHash,
-					int startCol) const {
+			int startCol) const
+{
 	string hash = startHash;
 	string pwd;
 	for (int col=startCol; col < this->columns-1; col++) {
@@ -186,7 +199,8 @@ std::string RainbowTable::getFinalHash(const std::string& startHash,
 }
 
 std::string RainbowTable::findHashInChain(const std::string& startPwd,
-			const std::string& startHash) const {
+			const std::string& startHash) const
+{
 	int col = 0;
 	string hash = this->hashWord(startPwd);
 	string pwd;
@@ -204,16 +218,10 @@ std::string RainbowTable::findHashInChain(const std::string& startPwd,
 	return "";
 }
 
-std::vector<std::string> RainbowTable::allPasswords() const {
-	return vector<string>();
-}
-
-std::string RainbowTable::testWord(const std::string& word) const {
+std::string RainbowTable::testWord(const std::string& word) const
+{
 	string hash = this->hashWord(word);
 	return this->crackPassword(hash);
 }
 
-void RainbowTable::printTable() const {
-	table.toString(cout);
-}
 

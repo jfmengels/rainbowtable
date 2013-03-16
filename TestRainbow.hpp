@@ -8,27 +8,80 @@
 class TestRainbow
 {
 	public:
+		/**
+		  * Creates the command line interface.
+		  * isSilent : false if commands should display results when invoked,
+		  *			   true otherwise.
+		  */
 		TestRainbow(bool isSilent=false);
+		
+		/**
+		  * Destroys the interface, freeing up the RainbowTable it contains.
+		  */
 		~TestRainbow();
+		
+		/**
+		  * Executes a command specified by action.
+		  * action : command name catched from user input.
+		  */
 		void doAction(const std::string& action);
 		
 	private:
+		/***************** Atrributes *****************/
+		/* Rainbow table */
 		RainbowTable* _rain;
+		/* isSilent : false if commands should display results when invoked,
+		true otherwise. */
 		bool _isSilent;
+		/* Static pointer to _rain. Used so that static method handleSignalCTRLC
+		can free memory when user interrupts the execution. */
 		static RainbowTable** _rainInstance;
 	
 	
+		/***************** Methods *****************/
+		/**
+		  * Prints the commands available to the user.
+		  */
 		void printInstructions() const;
 
+		/**
+		  * Computes the time since t0, and returns it as seconds.
+		  * t0 : Start time.
+		  */
 		double computeTime(const struct timeval& t0) const;
 
-		double crackHash(const std::string& hash) const;
+		/**
+		  * Cracks a hash.
+		  * hash : Hash to crack.
+		  * Returns the time the operation took, and hasFound will equal true
+		  * if the operation was a success, false otherwise.
+		  */
+		double crackHash(const std::string& hash, bool& hasFound) const;
 
-		double crackWord(const std::string& pwd) const;
+		/**
+		  * Cracks the hash associated to a password.
+		  * pwd : Password to hash, and then to crack.
+		  * Returns the time the operation took, and hasFound will equal true
+		  * if the operation was a success, false otherwise.
+		  */
+		double crackWord(const std::string& pwd, bool& hasFound) const;
+		
+		/**
+		  * Creates a new table, using the user inputted arguments.
+		  * Returns the time the operation took.
+		  */
 		double newTable();
 
+		/**
+		  * Loads a table from a file.
+		  * fileName : Name of the file to read in.
+		  * Returns the time the operation took.
+		  */
 		double loadTable(const std::string& fileName);
 
+		/**
+		  * Handles the CTRL-C (interruption) signal.
+		  */
 		static void handleSignalCTRLC(int signal);
 
 };
