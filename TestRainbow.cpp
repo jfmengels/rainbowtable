@@ -1,13 +1,28 @@
+#include "TestRainbow.hpp"
 #include <iostream>
-#include <sys/time.h>
 #include <iomanip>
-#include "RainbowTable.hpp"
 #include <signal.h>
 #include <stdlib.h>
 
 using namespace std;
 
-void printInstructions() {
+RainbowTable** TestRainbow::_rainInstance = NULL;
+
+TestRainbow::TestRainbow(bool isSilent)
+{
+	this->_isSilent = isSilent;
+	_rain = NULL;
+	TestRainbow::_rainInstance = &_rain;
+	signal(SIGINT, TestRainbow::handleSignalCTRLC);
+}
+
+TestRainbow::~TestRainbow()
+{
+	delete _rain;
+}
+
+void TestRainbow::printInstructions() const
+{
 	cout << "help -- Displays this menu." << endl;
 	cout << "new ncols nrows chars pwdlength hash --" << endl
 		 << "\tCreates a new rainbow table with ncols columns, nrows rows," << endl
@@ -20,7 +35,8 @@ void printInstructions() {
 	cout << "quit -- Quits the program." << endl;
 }
 
-double computeTime(const struct timeval& t0) {
+double TestRainbow::computeTime(const struct timeval& t0) const
+{
 	struct timeval t1;
 	gettimeofday(&t1, 0);
 	double dTime1 = t0.tv_sec+(t0.tv_usec/1000000.0);
@@ -28,10 +44,11 @@ double computeTime(const struct timeval& t0) {
 	return dTime2-dTime1;
 }
 
-void crackHash(const RainbowTable* rain, const string& hash) {
+double TestRainbow::crackHash(const string& hash) const
+{
 	struct timeval t;
 	gettimeofday(&t, 0);	
-	string res = rain->crackPassword(hash);
+	string res = _rain->crackPassword(hash);
 	double time = computeTime(t);
 	
 	cout << "'" << hash << "' --> ";
@@ -41,14 +58,16 @@ void crackHash(const RainbowTable* rain, const string& hash) {
 		cout << "'" << res << "'";
 	}
 	cout << " (" << setprecision(4) << time << " seconds)" << endl;
+	return time;
 }
 
-void crackWord(const RainbowTable* rain, const string& pwd) {
+double TestRainbow::crackWord(const string& pwd) const
+{
 	struct timeval t;
 	gettimeofday(&t, 0);
-	string res = rain->testWord(pwd);
+	string res = _rain->testWord(pwd);
 	double time = computeTime(t);
-	string hash = rain->hashWord(pwd);
+	string hash = _rain->hashWord(pwd);
 	cout << "'" << pwd << "' --> '" << hash << "' --> ";
 	if (res == "") {
 		cout << "Not found...";
@@ -57,9 +76,12 @@ void crackWord(const RainbowTable* rain, const string& pwd) {
 	}
 	cout << " (" << setprecision(4) << time << " seconds)"
 		 << endl;
+	return time;
 }
 
-void newTable(RainbowTable** rain) {
+double TestRainbow::newTable()
+{
+	delete _rain;
 	int ncols, nrows, pwdLength;
 	string chars, hash;
 	HashMethod* hashMethod;
@@ -74,42 +96,54 @@ void newTable(RainbowTable** rain) {
 	}
 	struct timeval t;
 	gettimeofday(&t, 0);
-	*rain = new RainbowTable(ncols, nrows, chars, pwdLength, hashMethod);
+	_rain = new RainbowTable(ncols, nrows, chars, pwdLength, hashMethod);
 	double time = computeTime(t);
 	cout << "Table generated (" << setprecision(4)
 		 << time << " seconds)" << endl;
+	 return time;
 }
 
-void loadTable(RainbowTable** rain, const string& fileName) {
-	delete *rain;
+double TestRainbow::loadTable(const string& fileName)
+{
+	delete _rain;
 	struct timeval t;
 	gettimeofday(&t, 0);
-	*rain = new RainbowTable(fileName);
+	_rain = new RainbowTable(fileName);
 	double time = computeTime(t);
 	cout << "Table loaded (" << setprecision(4)
 		 << time << " seconds)" << endl;
+	return time;
 }
 
-void doAction(RainbowTable** rain, const string& action) {
+void TestRainbow::doAction(const string& action)
+{
 	string param1;
 	if (action == "help") {
 		printInstructions();
-	} else if (action == "new") {
-		delete *rain;
-		newTable(rain);
-	} else if (action == "load") {
+	}
+	else if (action == "new") {
+		newTable();
+	}
+	else if (action == "load") {
 		cin >> param1;	// File name
-		loadTable(rain, param1);
-	} else if (action == "crackH") {
+		loadTable(param1);
+	}
+	else if (_rain == NULL && action != "quit") {
+		cout << "***You need to create or load a table first." << endl;
+	}
+	else if (action == "crackH") {
 		cin >> param1;	// Hash to crack.
-		crackHash(*rain, param1);
-	} else if (action == "crackW") {
+		crackHash(param1);
+	}
+	else if (action == "crackW") {
 		cin >> param1;	// Word to hash, and then to crack.
-		crackWord(*rain, param1);
-	} else if (action == "save") {
+		crackWord(param1);
+	}
+	else if (action == "save") {
 		cin >> param1;	// File name
-		(*rain)->writeToFile(param1);
-	} else if (action != "quit") {
+		_rain->writeToFile(param1);
+	}
+	else if (action != "quit") {
 		cout << action << " is not a valid command." << endl;
 		// Flush buffer
 		cin.clear();
@@ -117,26 +151,23 @@ void doAction(RainbowTable** rain, const string& action) {
 	}
 }
 
-
-RainbowTable* rain = NULL;
-
-void sig_hnd(int sig) {
-	delete rain;
+void TestRainbow::handleSignalCTRLC(int signal)
+{
+	delete *(TestRainbow::_rainInstance);
+	cout << endl;
 	exit(EXIT_SUCCESS);
 }
 
 
-int main() {
-	signal( SIGINT, sig_hnd );
-	
+int main() {	
+	TestRainbow test;
 	string action;
 	cout << "Enter 'help' to learn the commands." << endl;
 	cout << "You should first create or load a new rainbow table." << endl;
 	while (action != "quit") {
-		cout << "<<< ";
+		cout << ">>> ";
 		cin >> action;
-		doAction(&rain, action);
+		test.doAction(action);
 	}
-	delete rain;
 	return 0;
 }

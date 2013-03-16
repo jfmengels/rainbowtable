@@ -1,4 +1,4 @@
-OBJ=RainbowTable.o Table.o md5.o testRainbow.o
+OBJ=RainbowTable.o Table.o md5.o TestRainbow.o
 CC=g++
 CFLAGS=-fopenmp -ansi -I./ -g -lrt
 EXE=rain
@@ -15,8 +15,8 @@ Table.o : Table.cpp
 md5.o : md5.cpp
 	@$(CC) $(CFLAGS) -c md5.cpp
 
-testRainbow.o : testRainbow.cpp
-	@$(CC) $(CFLAGS) -c testRainbow.cpp
+TestRainbow.o : TestRainbow.cpp
+	@$(CC) $(CFLAGS) -c TestRainbow.cpp
 
 clean :
 	@rm $(EXE) *.o
