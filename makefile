@@ -19,4 +19,4 @@ TestRainbow.o : TestRainbow.cpp
 	@$(CC) $(CFLAGS) -c TestRainbow.cpp
 
 clean :
-	@rm $(EXE) *.o
+	@rm $(EXE) $(OBJ)
