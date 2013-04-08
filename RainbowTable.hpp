@@ -41,11 +41,6 @@ class RainbowTable
 		std::string createChain(std::string pwd) const;
 		
 		/**
-		  * Generates and returns a new correct password.
-		  */
-		std::string randomPassword() const;
-		
-		/**
 		  * Returns the hash corresponding to the end of a chain.
 		  * startHash : Hash to start from.
 		  * startCol : Index of the column to start the reducing/hashing from.
@@ -86,6 +81,11 @@ class RainbowTable
 		  * Destroys the table, freeing the memory.
 		  */
 		~RainbowTable();
+		
+		/**
+		  * Generates and returns a new correct password.
+		  */
+		std::string randomPassword() const;
 		
 		/**
 		  * Write the table to a file.

@@ -98,7 +98,7 @@ void RainbowTable::readFromFile(std::string const& fileName)
 		string pwd, hash;
 		in >> pwd;
 		in >> hash;
-		while(in) { // While file contains rows,, read and insert
+		while(in) { // While file contains rows, read and insert
 					// them in the table.
 			this->table.insertAtEnd(hash, pwd);
 			in >> pwd;

@@ -80,6 +80,21 @@ class TestRainbow
 		double loadTable(const std::string& fileName);
 
 		/**
+		  * Generates a file containing valid random passwords.
+		  * n : Number of passwords to generate.
+		  * fileName : Name of the file to write to.
+		  * Returns the time the operation took.
+		  */
+		double generatePwdFile(int n, const std::string& fileName);
+
+		/**
+		  * Reads a list of passwords from a file, and tries to crack them.
+		  * fileName : Name of the file to write to.
+		  * Returns the success percentage.
+		  */
+		double testPwdFile(const std::string& fileName);
+
+		/**
 		  * Handles the CTRL-C (interruption) signal.
 		  */
 		static void handleSignalCTRLC(int signal);
