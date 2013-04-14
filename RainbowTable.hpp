@@ -57,7 +57,15 @@ class RainbowTable
 		  */
 		std::string findHashInChain(const std::string& startPwd,
 					const std::string& startHash) const;
-		
+
+		/**
+		  * Replaces a portion of a string.
+		  * str : String to modify.
+		  * from : String to find.
+		  * to : String to replace.
+		  */		
+		void replace(std::string& str, const std::string& from,
+					const std::string& to);
 	
 	public:
 		/**
