@@ -1,0 +1,80 @@
+# Global .gitignore from MType project	-*- Makefile -*-
+# Output program
+rain
+
+# Object files
+*.o
+*.cm[xo]
+
+# Library files
+*.a
+*.so
+*.cma
+*.cmxa
+!*.cmake
+
+# Editors' temporary files.
+*~
+*#
+.*.swp
+.*.swo
+
+# (pdf)latex files
+*.log
+*.pdf
+!ref/*.pdf
+*.dvi
+*.aux
+*.toc
+*.txt
+*.out
+*.blg
+*.snm
+*.nav
+*.bbl
+
+# Tarballs
+*.tar.bz2
+*.tar.gz
+*.zip
+*.rar
+
+# Autotools
+*.in
+build-aux
+*.m4
+autom4te.cache
+configure
+Makefile
+
+# CMake
+!CMakeLists.txt
+CMakeFiles/
+#*.cmake
+
+# Generated Documentation.
+doc/html
+doc/latex
+!Doxyfile
+
+# Generated Files (Usage is to start their names with `gen')
+gen*
+
+# Others
+*.core
+!src/core/
+.*
+!.gitignore
+!.gitconfig
+!.gitattributes
+_*
+
+# Binaries
+a.out
+*.exe
+
+# C# special files
+*.suo
+*.user
+bin/
+obj/
