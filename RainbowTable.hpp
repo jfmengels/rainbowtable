@@ -4,10 +4,9 @@
 #include <vector>
 #include "HashMethod.hpp"
 #include "Table.hpp"
-#define LETTERSLOWER std::string("abcdefghijklmnopqrstuvwxyz")
-#define LETTERSUPPER std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-#define DIGITS std::string("0123456789")
-#define ALL LETTERSLOWER+LETTERSUPPER+DIGITS
+#define LETTERSLOWER "abcdefghijklmnopqrstuvwxyz"
+#define LETTERSUPPER "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define DIGITS "0123456789"
 
 class RainbowTable
 {
